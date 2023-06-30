@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameSession : MonoBehaviour
 {
@@ -33,8 +34,26 @@ public class GameSession : MonoBehaviour
         // first instance should be kept and do NOT destroy it on load
         _instance = this;
         DontDestroyOnLoad(this.gameObject);
+        SceneManager.activeSceneChanged += SubcribeChangeScene;
+        SubcribePotionManager();
     }
-    
+
+    private void SubcribeChangeScene(Scene arg0, Scene arg1)
+    {
+        SubcribePotionManager();
+    }
+
+    protected virtual void SubcribePotionManager()
+    {
+        PotionManager.Instance.OnPotionApply += AddHeart;
+    }
+    private void AddHeart(PotionType obj)
+    {
+        if (obj != PotionType.Heart) return;
+        if (PlayerLives >= 5) return;
+        PlayerLives++;
+    }
+
     /**
      * Before first frame.
      */

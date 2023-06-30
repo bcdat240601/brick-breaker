@@ -94,7 +94,7 @@ public class Block : MonoBehaviour
 
         // plays VFX and SFX for the destruction
         PlayDestructionEffects();
-
+        PotionSpawner.Instance.SpawnRandomObject(transform.position, Quaternion.identity);
         // increments destroyed blocks of the level
         _levelController.DecrementBlocksCounter();
     }

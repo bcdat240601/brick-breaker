@@ -17,6 +17,28 @@ public class Paddle : MonoBehaviour
     [SerializeField]
     public float screenWidthUnits = 16;
 
+    private void Awake()
+    {
+        PotionManager.Instance.OnPotionApply += ApplyGear;
+        PotionManager.Instance.OnEffectTimeout += RemoveGear;
+        PotionManager.Instance.OnRemoveAllEffect += RemoveGear;
+    }
+
+    private void ApplyGear(PotionType obj)
+    {
+        if (obj == PotionType.Gear)
+            transform.localScale = new Vector3(2, transform.localScale.y, transform.localScale.z);
+    }
+    private void RemoveGear(PotionType obj)
+    {
+        if (obj == PotionType.Gear)
+            transform.localScale = new Vector3(1, transform.localScale.y, transform.localScale.z);
+    }
+    protected virtual void RemoveGear()
+    {
+        transform.localScale = new Vector3(1, transform.localScale.y, transform.localScale.z);
+    }
+
     // Start is called before the first frame update
     void Start()
     {

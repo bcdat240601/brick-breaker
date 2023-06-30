@@ -11,7 +11,10 @@ public class Ball : MonoBehaviour
     [SerializeField] private Vector2 initialBallSpeed = new Vector2(2f, 10f);
     [SerializeField] private float bounceRandomnessFactor = 0.5f;
     [SerializeField] private AudioClip[] bumpAudioClips;
-    
+    [SerializeField] protected float speed;
+    [SerializeField] protected float defaultSpeed = 1f;
+    [SerializeField] protected float bluePotionStack;
+
     private Paddle _paddle;
     private Vector2 _initialDistanceToTopOfPaddle;
     private Rigidbody2D _rigidBody2D;
@@ -31,11 +34,31 @@ public class Ball : MonoBehaviour
         var ballPosition = transform.position;
         var paddlePosition = _paddle.transform.position;
 
-        _initialDistanceToTopOfPaddle = ballPosition - paddlePosition;  // assumes ball always starts on TOP of the paddle
+        _initialDistanceToTopOfPaddle = ballPosition - paddlePosition;  // assumes ball always starts on TOP of the paddle        
+        PotionManager.Instance.OnPotionApply += ApplyPotion;
+        PotionManager.Instance.OnEffectTimeout += RemovePotion;
+        PotionManager.Instance.OnRemoveAllEffect += RemoveAllBluePotion;
     }
-    
-    private void Update()
+    private void Start()
     {
+        Debug.Log(GameSession.Instance.GameSpeed);
+        defaultSpeed = GameSession.Instance.GameSpeed;
+        speed = defaultSpeed;
+    }
+
+    protected virtual void ApplyPotion(PotionType obj)
+    {
+        if (obj == PotionType.BlueBottle)
+            ApplyOneBluePotion();
+    }
+    protected virtual void RemovePotion(PotionType obj)
+    {
+        if (obj == PotionType.BlueBottle)
+            RemoveOneBluePotion();
+    }
+
+    private void Update()
+    {        
         // if ball has been shot, no locking or shooting it again!
         if (HasBallBeenShot) return;
         
@@ -101,6 +124,24 @@ public class Ball : MonoBehaviour
         if (Math.Abs(_rigidBody2D.velocity.x) < 4f) correctVelocityX = 4f * signVelocityX;
         
         _rigidBody2D.velocity = new Vector2(correctVelocityX, correctVelocityY);
+    }
+    protected virtual void ApplyOneBluePotion()
+    {
+        if (bluePotionStack >= 5) return;        
+        speed -= defaultSpeed * 0.1f;
+        GameSession.Instance.GameSpeed = speed;
+        bluePotionStack++;
+    }
+    protected virtual void RemoveOneBluePotion()
+    {
+        if (bluePotionStack <= 0) return;
+        speed += defaultSpeed * 0.1f;
+        GameSession.Instance.GameSpeed = speed;
+        bluePotionStack--;
+    }
+    protected virtual void RemoveAllBluePotion()
+    {
+        GameSession.Instance.GameSpeed = defaultSpeed;
     }
 
 }
