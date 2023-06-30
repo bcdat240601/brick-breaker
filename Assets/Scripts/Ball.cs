@@ -1,21 +1,28 @@
-﻿using System;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System;
+using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Sirenix.OdinInspector;
+using UnityEditor;
 
-public class Ball : MonoBehaviour
+public class Ball : SetupBehaviour
 {
     // constants
     private const int MOUSE_PRIMARY_BUTTON = 0;
-    
+    [SerializeField] protected ObjectPlay objectPlay;
     // fields
-    [SerializeField] private Vector2 initialBallSpeed = new Vector2(2f, 10f);
+    [SerializeField] private Vector2 initialBallSpeed = new Vector2(4f, 12f);
     [SerializeField] private float bounceRandomnessFactor = 0.5f;
-    [SerializeField] private AudioClip[] bumpAudioClips;
+
+    //[SerializeField, FolderPath(ParentFolder = "Assets")] string path;
+
+    [SerializeField] protected List<AudioClip> bumpAudioClips;
     [SerializeField] protected float speed;
     [SerializeField] protected float defaultSpeed = 1f;
     [SerializeField] protected float bluePotionStack;
 
-    private Paddle _paddle;
     private Vector2 _initialDistanceToTopOfPaddle;
     private Rigidbody2D _rigidBody2D;
     private AudioSource _audioSource;
@@ -25,23 +32,98 @@ public class Ball : MonoBehaviour
     public Paddle Paddle { get; set; }
     public bool HasBallBeenShot { get; set; } = false;
 
-    private void Awake()
+    protected override void Awake()
     {
-        _paddle = FindObjectOfType<Paddle>();
-        _rigidBody2D = GetComponent<Rigidbody2D>();
-        _audioSource = GetComponent<AudioSource>();
-
+        base.Awake();
         var ballPosition = transform.position;
-        var paddlePosition = _paddle.transform.position;
+        var paddlePosition = objectPlay.Paddle.transform.position;
 
         _initialDistanceToTopOfPaddle = ballPosition - paddlePosition;  // assumes ball always starts on TOP of the paddle        
         PotionManager.Instance.OnPotionApply += ApplyPotion;
         PotionManager.Instance.OnEffectTimeout += RemovePotion;
         PotionManager.Instance.OnRemoveAllEffect += RemoveAllBluePotion;
     }
-    private void Start()
+
+    protected override void LoadComponents()
     {
-        Debug.Log(GameSession.Instance.GameSpeed);
+        base.LoadComponents();
+        GetRigidBody();
+        GetAudioSource();
+        SetAudioClips();
+        GetObjectPlay();
+    }
+
+    protected virtual void GetObjectPlay()
+    {
+        if (objectPlay != null) return;
+        objectPlay = GetComponentInParent<ObjectPlay>();
+        Debug.Log("Reset " + nameof(objectPlay) + " in " + GetType().Name);
+    }
+
+    protected virtual void GetAudioSource()
+    {
+        if (_audioSource != null) return;
+        _audioSource = GetComponent<AudioSource>();
+        Debug.Log("Reset " + nameof(_audioSource) + " in " + GetType().Name);
+    }
+
+    protected virtual void GetRigidBody()
+    {
+        if (_rigidBody2D != null) return;
+        _rigidBody2D = GetComponent<Rigidbody2D>();
+        Debug.Log("Reset " + nameof(_rigidBody2D) + " in " + GetType().Name);
+    }
+
+    private AudioClip[] audioClips;
+
+    public void SetAudioClips()
+    {
+        bumpAudioClips.Clear();
+        string path = "Audio/bump";
+        string fullPath = $"{Application.dataPath}/{path}";
+        if (!System.IO.Directory.Exists(fullPath))
+        {
+            return;
+        }
+
+        var folders = new string[] { $"Assets/{path}" };
+        var guids = AssetDatabase.FindAssets("t:AudioClip", folders);
+
+        var newSprites = new AudioClip[guids.Length];
+
+        bool mismatch;
+        if (audioClips == null)
+        {
+            mismatch = true;
+            audioClips = newSprites;
+        }
+        else
+        {
+            mismatch = newSprites.Length != audioClips.Length;
+        }
+
+        for (int i = 0; i < newSprites.Length; i++)
+        {
+            path = AssetDatabase.GUIDToAssetPath(guids[i]);
+            newSprites[i] = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            mismatch |= (i < audioClips.Length && audioClips[i] != newSprites[i]);
+        }
+
+        if (mismatch)
+        {
+            audioClips = newSprites;
+            Debug.Log($"{name} Audio list updated.");
+        }
+
+        foreach (AudioClip obj in audioClips)
+        {
+            bumpAudioClips.Add(obj);
+        }
+        Array.Clear(audioClips, 0, audioClips.Length);
+    }
+
+    private void Start()
+    {        
         defaultSpeed = GameSession.Instance.GameSpeed;
         speed = defaultSpeed;
     }
@@ -63,7 +145,7 @@ public class Ball : MonoBehaviour
         if (HasBallBeenShot) return;
         
         var hasMouseClick = Input.GetMouseButtonDown(MOUSE_PRIMARY_BUTTON);
-        var paddlePosition = _paddle.transform.position;
+        var paddlePosition = objectPlay.Paddle.transform.position;
             
         FixBallOnTopOfPaddle(paddlePosition, _initialDistanceToTopOfPaddle);
         ShootBallOnClick(initialBallSpeed, hasMouseClick);
@@ -108,7 +190,7 @@ public class Ball : MonoBehaviour
     {
         if (!HasBallBeenShot) return;  // ball must have been shot first
         
-        var randomBumpAudioIndex = Random.Range(0, bumpAudioClips.Length);
+        var randomBumpAudioIndex = Random.Range(0, bumpAudioClips.Count);
         var signVelocityY = Math.Sign(_rigidBody2D.velocity.y);
         var signVelocityX = Math.Sign(_rigidBody2D.velocity.x);
         

@@ -61,7 +61,7 @@ public class MenuOptionsSelector : VerticalMenuSelector
         if (Input.GetKeyDown(KeyCode.Return))
         {
             this._gameConfig.GameMode = GetSelectedGameMode();
-            this.sceneLoader.LoadStartScene();
+            sceneLoaderChannel.RaiseLoadStartScene();
         }
     }
 

@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,8 @@ public class LevelData
 }
 [CreateAssetMenu(fileName = "new LevelData", menuName = "ScriptableObjects/LevelData")]
 public class LevelDataSO : ScriptableObject
-{    
+{
+    [Searchable]
     public List<LevelData> LevelDataList;
-    public int currentLevelHasPlayed = 2;
+    public int currentLevelHasPlayed = 0;
 }

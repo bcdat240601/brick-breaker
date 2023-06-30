@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PotionSpawner : Spawner
 {
@@ -15,7 +16,14 @@ public class PotionSpawner : Spawner
             Debug.LogError("there's 2 PotionSpawner in the scene");
         }
         instance = this;
+        SceneManager.activeSceneChanged += ChangeSceneTrigger;
     }
+
+    protected virtual void ChangeSceneTrigger(Scene arg0, Scene arg1)
+    {
+        DespawnAllPrefabs();
+    }
+
     public virtual void SpawnRandomObject(Vector3 potion, Quaternion rotation)
     {
         int random1 = Random.Range(1, 11);
@@ -27,4 +35,5 @@ public class PotionSpawner : Spawner
         Spawn(potionType.ToString(), potion, rotation);
 
     }
+    
 }

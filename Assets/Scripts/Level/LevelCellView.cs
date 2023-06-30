@@ -170,6 +170,8 @@ public class LevelCellView : EnhancedScrollerCellView
             child.TryGetComponent<Level>(out level);
             if (level == null)
                 continue;
+            level.currentLevel = minIndex;
+            level.SubcribeButton();
             level.TextLevel.text = minIndex.ToString();
             if (minIndex > ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed + 1)
                 level.SpiderWeb.enabled = true;

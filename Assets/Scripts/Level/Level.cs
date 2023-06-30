@@ -6,13 +6,16 @@ using UnityEngine.UI;
 using System;
 using EnhancedUI.EnhancedScroller;
 
-public class Level : SetupBehaviour
+public class Level : SceneLoaderConnect
 {
+    public int currentLevel;
     [SerializeField] protected TextMeshProUGUI textLevel;
     public TextMeshProUGUI TextLevel => textLevel;
     [SerializeField] protected List<Image> stars;
     [SerializeField] protected Image spiderWeb;
     public Image SpiderWeb => spiderWeb;
+    [SerializeField] protected Button buttonLevel;
+    public Button ButtonLevel => buttonLevel;
 
     protected override void LoadComponents()
     {
@@ -20,6 +23,24 @@ public class Level : SetupBehaviour
         GetTextLevel();
         GetStars();
         GetSpiderWeb();
+        GetButtonLevel();
+    }
+    public virtual void SubcribeButton()
+    {
+        if (currentLevel > ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed + 1) return;
+        buttonLevel.onClick.AddListener(() => sceneLoaderChannel.RaiseLoadSceneByName("Level" + currentLevel));
+    }
+    protected virtual void OnDisable()
+    {
+        if (currentLevel > ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed + 1) return;
+        buttonLevel.onClick.RemoveListener(() => sceneLoaderChannel.RaiseLoadSceneByName("Level" + currentLevel));
+    }
+
+    protected virtual void GetButtonLevel()
+    {
+        if (buttonLevel != null) return;
+        buttonLevel = GetComponentInChildren<Button>();
+        Debug.Log("Reset " + nameof(buttonLevel) + " in " + GetType().Name);
     }
 
     protected virtual void GetTextLevel()

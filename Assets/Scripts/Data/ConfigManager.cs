@@ -1,16 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ConfigManager : SetupBehaviour
 {
-    public static ConfigManager Instance { get; private set; }
-    public LevelDataSO LevelDataSO;
-    private void Awake()
-    {
-        if (Instance == null)
-            Instance = this;
+    protected static ConfigManager instance;
+    public static ConfigManager Instance => instance;
 
+    public LevelDataSO LevelDataSO;
+    protected override void Awake()
+    {
+        base.Awake();
+        if (instance != null)
+        {
+            Destroy(this.gameObject);
+            Debug.LogError("there's 2 ConfigManager in the scene");
+        }
+        instance = this;
     }
     protected override void LoadComponents()
     {

@@ -19,9 +19,16 @@ public class Paddle : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log(transform.name);
         PotionManager.Instance.OnPotionApply += ApplyGear;
         PotionManager.Instance.OnEffectTimeout += RemoveGear;
         PotionManager.Instance.OnRemoveAllEffect += RemoveGear;
+    }
+    private void OnDestroy()
+    {
+        PotionManager.Instance.OnPotionApply -= ApplyGear;
+        PotionManager.Instance.OnEffectTimeout -= RemoveGear;
+        PotionManager.Instance.OnRemoveAllEffect -= RemoveGear;
     }
 
     private void ApplyGear(PotionType obj)

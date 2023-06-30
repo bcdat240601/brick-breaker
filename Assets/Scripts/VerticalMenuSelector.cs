@@ -1,16 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /**
  * Script used to add vertical selection to a menu selector. It exposes the variable
  * SelectedMenuOptionIndex for subclasses to know the actual menu position.
  */
-public class VerticalMenuSelector : MonoBehaviour
+public class VerticalMenuSelector : SceneLoaderConnect
 {
     // configuration
     [SerializeField] protected GameObject[] verticalMenuOptions;
-    [SerializeField] protected SceneLoader sceneLoader;
+
     
     // state
     private int _selectedMenuOptionIndex = 0;  // (up, down) arrows
@@ -22,7 +24,27 @@ public class VerticalMenuSelector : MonoBehaviour
     {
         return this.verticalMenuOptions[this._selectedMenuOptionIndex];
     }
-    
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        GetVericalMenuOption();
+    }
+
+    protected virtual void GetVericalMenuOption()
+    {
+        Transform menuOptionTransform = transform.parent.Find("MenuOptions");
+        int childCount = menuOptionTransform.childCount;
+        GameObject[] childObjects = new GameObject[childCount];
+        for (int i = 0; i < childCount; i++)
+        {
+            Transform childTransform = menuOptionTransform.GetChild(i);
+            childObjects[i] = childTransform.gameObject;
+        }
+        if (verticalMenuOptions.Length == childObjects.Length) return;
+        verticalMenuOptions = childObjects;
+        Debug.Log("Reset " + nameof(verticalMenuOptions) + " in " + GetType().Name);
+    }
+
     /**
      * Returns a new Vector2 position for the menu selector position. The position is calculated
      * according to the currently selected menu option (private variable: this._selectedMenuOptionIndex).

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 211279021064368254}
   - component: {fileID: 211279021064368225}
+  - component: {fileID: 56780466}
   m_Layer: 0
   m_Name: GameSessionLoader
   m_TagString: Untagged
@@ -27,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 401.53445, y: 182.51222, z: -114.875275}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -43,3 +45,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0916807035f5b431a9f5e09fb1debd1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &56780466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211279021064368224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69ecc76be7e93894a8cc53329921129f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectID: 

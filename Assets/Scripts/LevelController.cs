@@ -3,21 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelController : MonoBehaviour
+public class LevelController : SceneLoaderConnect
 {
     private readonly string GAME_OVER_SCENE_NAME = "Scenes/GameOver";
     private readonly int NUMBER_OF_GAME_LEVELS = 3;
     
     // UI elements
     [SerializeField] int blocksCounter;
-
-    // state
-    private SceneLoader _sceneLoader;
-    
-    private void Start()
-    {
-        _sceneLoader = FindObjectOfType<SceneLoader>();
-    }
 
     public void IncrementBlocksCounter()
     {
@@ -35,12 +27,15 @@ public class LevelController : MonoBehaviour
             // check for game over
             if (gameSession.GameLevel >= NUMBER_OF_GAME_LEVELS)
             {
-                _sceneLoader.LoadSceneByName(GAME_OVER_SCENE_NAME);
+                sceneLoaderChannel.RaiseLoadSceneByName(GAME_OVER_SCENE_NAME);
             }
 
             // increases game level
+            ConfigManager.Instance.LevelDataSO.LevelDataList[gameSession.GameLevel - 1].Star = 3;
+            if(ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed < gameSession.GameLevel)
+                ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed = gameSession.GameLevel;
             gameSession.GameLevel++;
-            _sceneLoader.LoadNextScene();
+            sceneLoaderChannel.RaiseLoadNextScene();
         }
     }
     

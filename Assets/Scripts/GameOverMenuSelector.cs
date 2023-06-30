@@ -33,9 +33,12 @@ public class GameOverMenuSelector : VerticalMenuSelector
     {
         GameObject currentMenu = this.GetCurrentMenu();
 
-        if (currentMenu.name == this.MENU_OPTION_GO_AGAIN) 
-            this.sceneLoader.LoadStartScene();
-        else 
-            this.sceneLoader.Quit();
+        if (currentMenu.name == this.MENU_OPTION_GO_AGAIN)
+        {
+            sceneLoaderChannel.RaiseLoadStartScene();
+            Debug.Log("Return2");
+        }
+        else
+            sceneLoaderChannel.RaiseQuit();
     }
 }

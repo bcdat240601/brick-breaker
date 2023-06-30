@@ -40,16 +40,16 @@ public class MenuSelector : VerticalMenuSelector
     {
         var currentMenu = this.GetCurrentMenu();
 
-        if (currentMenu.name == MENU_OPTION_START) 
-            this.sceneLoader.LoadSceneByName("Level1");
-        
-        else if (currentMenu.name == MENU_OPTION_INSTRUCTIONS) 
-            this.sceneLoader.LoadSceneByName("InstructionsMenu");
-        
-        else if (currentMenu.name == MENU_OPTION_OPTIONS) 
-            this.sceneLoader.LoadSceneByName("OptionsMenu");
+        if (currentMenu.name == MENU_OPTION_START)
+            sceneLoaderChannel.RaiseLoadSceneByName("Level1");
 
-        else 
-            this.sceneLoader.Quit();
+        else if (currentMenu.name == MENU_OPTION_INSTRUCTIONS)
+            sceneLoaderChannel.RaiseLoadSceneByName("InstructionsMenu");
+
+        else if (currentMenu.name == MENU_OPTION_OPTIONS)
+            sceneLoaderChannel.RaiseLoadSceneByName("OptionsMenu");
+
+        else
+            sceneLoaderChannel.RaiseQuit();
     }
 }

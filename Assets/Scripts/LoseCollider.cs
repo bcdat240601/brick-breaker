@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LoseCollider : MonoBehaviour
+public class LoseCollider : SceneLoaderConnect
 {
     private readonly string GAME_OVER_SCENE_NAME = "Scenes/GameOver";
     
@@ -18,7 +18,7 @@ public class LoseCollider : MonoBehaviour
             // checks for game over
             if (gameSession.PlayerLives <= 0)
             {
-                SceneManager.LoadScene(GAME_OVER_SCENE_NAME);
+                sceneLoaderChannel.RaiseLoadSceneByName(GAME_OVER_SCENE_NAME);
                 return;
             }
 
