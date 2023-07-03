@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneLoader : SetupBehaviour
 {
+    [SerializeField] protected SceneAcceptable sceneAcceptable;
     [SerializeField] protected SceneLoaderChannel SceneLoaderChannel;
     [SerializeField] protected string SETUP_SCENE;
     [SerializeField] protected List<Scene> sceneToUnload;
@@ -38,6 +40,15 @@ public class SceneLoader : SetupBehaviour
     {
         base.LoadComponents();
         GetSceneLoaderChannel();
+        GetSceneAcceptable();
+    }
+
+    protected virtual void GetSceneAcceptable()
+    {
+        if (sceneAcceptable != null) return;
+        string path = "Scene/SceneAcceptable";
+        sceneAcceptable = Resources.Load<SceneAcceptable>(path);
+        Debug.Log("Reset " + nameof(sceneAcceptable) + " in " + GetType().Name);
     }
 
     protected virtual void GetSceneLoaderChannel()
@@ -51,18 +62,19 @@ public class SceneLoader : SetupBehaviour
     // loads next scene based on the scene ordering defined on Unity > build settings
     public void LoadNextScene()
     {
-        AddScenesToUnload();
         currentSceneIndex++;
         SceneManager.LoadSceneAsync(currentSceneIndex, LoadSceneMode.Additive);
+        Scene scene = SceneManager.GetSceneByBuildIndex(currentSceneIndex);
+        AddScenesToUnload(scene.name);
         UnloadScenes();
     }
 
     // loads scene by its name
     public void LoadSceneByName(string sceneName)
     {
-        AddScenesToUnload();        
-        SceneManager.LoadSceneAsync(sceneName: sceneName, LoadSceneMode.Additive);
+        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         currentSceneIndex = SceneManager.GetSceneByName(sceneName).buildIndex;
+        AddScenesToUnload(sceneName);        
         UnloadScenes();
     }
 
@@ -70,10 +82,10 @@ public class SceneLoader : SetupBehaviour
     public void LoadStartScene()
     {
         // FindObjectOfType<GameState>().ResetState();
-        Debug.Log("LoadStart");
-        AddScenesToUnload();
         currentSceneIndex = 0;
         SceneManager.LoadSceneAsync(currentSceneIndex, LoadSceneMode.Additive);
+        Scene scene = SceneManager.GetSceneByBuildIndex(currentSceneIndex);
+        AddScenesToUnload(scene.name);
         UnloadScenes();
     }
 
@@ -88,7 +100,6 @@ public class SceneLoader : SetupBehaviour
 
     protected virtual void HideMouse()
     {
-        Debug.Log("hideMouse");
         for (int i = 0; i < SceneManager.sceneCount; ++i)
         {
             Scene scene = SceneManager.GetSceneAt(i);
@@ -113,8 +124,55 @@ public class SceneLoader : SetupBehaviour
             }
         }
     }
+    protected virtual void AddScenesToUnload(string sceneName)
+    {         
+        // Parse the Next Scene name To PrimaryScene enum
+        Enum.TryParse(sceneName, out PrimaryScene primaryScene);
+        if(primaryScene == PrimaryScene.None)
+        {
+            // return if the next scene is not found
+            Debug.LogError("Invalid Scene");
+            return;
+        }
+        // Get the list of sub scene of next scene
+        sceneAcceptable.SceneDic.TryGetValue(primaryScene, out List<SubScene> subScene);
+        for (int i = 0; i < SceneManager.sceneCount; ++i)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            // Return this function if the active scene is the next scene because
+            // we load the next scene additively first before unload previous scene
+            if (scene.name == sceneName) return;
+
+            Enum.TryParse(scene.name, out SubScene result);
+            if(result == SubScene.None)
+            {
+                Debug.Log("Added scene to unload = " + scene.name);
+                //Add the scene to the list of the scenes to unload
+                sceneToUnload.Add(scene);
+                continue;
+            }
+            else
+            {
+                if(subScene == null)
+                {
+                    Debug.Log("Added scene to unload = " + scene.name);
+                    //Add the scene to the list of the scenes to unload
+                    sceneToUnload.Add(scene);
+                    continue;
+                }
+
+                if (!subScene.Contains(result))
+                {
+                    Debug.Log("Added scene to unload = " + scene.name);
+                    //Add the scene to the list of the scenes to unload
+                    sceneToUnload.Add(scene);
+                }
+            }                       
+        }
+    }
     private void UnloadScenes()
     {
+        Debug.Log("StartUnload");
         if (sceneToUnload != null)
         {
             for (int i = 0; i < sceneToUnload.Count; ++i)

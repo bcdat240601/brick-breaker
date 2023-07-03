@@ -1,29 +1,34 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameSession : MonoBehaviour
+public class GameSession : SetupBehaviour
 {
-    // config
-    [SerializeField] private TextMeshProUGUI playerScoreText;
-    [SerializeField] private TextMeshProUGUI gameLevelText;
-    [SerializeField] private TextMeshProUGUI playerLivesText;
+
+    [SerializeField] protected UIChannel uiChannel;
 
     // state
     private static GameSession _instance;
     public static GameSession Instance => _instance;
 
-    public int GameLevel { get; set; }
-    public int PlayerScore { get; set; }
-    public int PlayerLives { get; set; }
-    public int PointsPerBlock { get; set; }
-    public float GameSpeed { get; set; }
+    [SerializeField] protected int gameLevel;
+    public int GameLevel => gameLevel;
+    [SerializeField] protected int playerScore;
+    public int PlayerScore => playerScore;
+    [SerializeField] protected int playerLives = 3;
+    public int PlayerLives => playerLives;
+    [SerializeField] protected int pointsPerBlock = 100;
+    public int PointsPerBlock => pointsPerBlock;
+    [SerializeField] protected float gameSpeed = 1f;
+    public float GameSpeed { get => gameSpeed; set => gameSpeed = value; }
     
     /**
      * Singleton implementation.
      */
-    private void Awake() 
-    { 
+    protected override void Awake() 
+    {
+        base.Awake();
         // this is not the first instance so destroy it!
         if (_instance != null && _instance != this)
         { 
@@ -31,50 +36,70 @@ public class GameSession : MonoBehaviour
             return;
         }
         
-        // first instance should be kept and do NOT destroy it on load
         _instance = this;
-        DontDestroyOnLoad(this.gameObject);
         SceneManager.activeSceneChanged += SubcribeChangeScene;
-        SubcribePotionManager();
+        SceneManager.sceneLoaded += ChangeScene;
+        PotionManager.Instance.OnPotionApply += AddHeart;
+    }
+
+    private void ChangeScene(Scene arg0, LoadSceneMode arg1)
+    {                
+        GameSpeed = 1f;
+        playerLives = 3;
+    }
+
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        GetUIChannel();
+    }
+
+    protected virtual void GetUIChannel()
+    {
+        if (uiChannel != null) return;
+        string path = "Channel/UIChannel";
+        uiChannel = Resources.Load<UIChannel>(path);
+        Debug.Log("Reset " + nameof(uiChannel) + " in " + GetType().Name);
     }
 
     private void SubcribeChangeScene(Scene arg0, Scene arg1)
     {
-        SubcribePotionManager();
+        SetInforForUI();        
     }
 
-    protected virtual void SubcribePotionManager()
+    protected void SetInforForUI()
     {
-        PotionManager.Instance.OnPotionApply += AddHeart;
+        Debug.Log("SetInfor");
+        uiChannel.RaiseLevel(gameLevel);
+        uiChannel.RaiseLives(playerLives);
+        uiChannel.RaisePoint(playerScore);
     }
+
     private void AddHeart(PotionType obj)
     {
         if (obj != PotionType.Heart) return;
         if (PlayerLives >= 5) return;
-        PlayerLives++;
+        playerLives++;
+        uiChannel.RaiseLives(PlayerLives);
+    }
+    public virtual void SetGameLevel(int level)
+    {
+        gameLevel = level;
+        uiChannel.RaiseLevel(gameLevel);
+    }
+    public virtual void SetPlayerLives(int live)
+    {
+        playerLives = live;
+        uiChannel.RaiseLives(playerLives);
     }
 
-    /**
-     * Before first frame.
-     */
-    void Start()
-    {
-        playerScoreText.text = this.PlayerScore.ToString();
-        gameLevelText.text = this.GameLevel.ToString();
-        playerLivesText.text = this.PlayerLives.ToString();
-    }
 
     /**
      * Update per-frame.
      */
     void Update()
     {
-        Time.timeScale = this.GameSpeed;
-        
-        // UI updates
-        playerScoreText.text = this.PlayerScore.ToString();
-        gameLevelText.text = this.GameLevel.ToString();
-        playerLivesText.text = this.PlayerLives.ToString();
+        Time.timeScale = this.GameSpeed;        
     }
 
     /**
@@ -83,7 +108,7 @@ public class GameSession : MonoBehaviour
      */
     public void AddToPlayerScore(int blockMaxHits)
     {
-        this.PlayerScore += blockMaxHits * this.PointsPerBlock;
-        playerScoreText.text = this.PlayerScore.ToString();
+        playerScore += blockMaxHits * this.PointsPerBlock;
+        uiChannel.RaisePoint(playerScore);
     }
 }

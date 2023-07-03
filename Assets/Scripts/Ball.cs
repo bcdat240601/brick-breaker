@@ -13,14 +13,16 @@ public class Ball : SetupBehaviour
     private const int MOUSE_PRIMARY_BUTTON = 0;
     [SerializeField] protected ObjectPlay objectPlay;
     // fields
-    [SerializeField] private Vector2 initialBallSpeed = new Vector2(4f, 12f);
+    [SerializeField] private Vector2 direction = new Vector2(4f, 12f).normalized;
+
     [SerializeField] private float bounceRandomnessFactor = 0.5f;
 
     //[SerializeField, FolderPath(ParentFolder = "Assets")] string path;
 
     [SerializeField] protected List<AudioClip> bumpAudioClips;
-    [SerializeField] protected float speed;
-    [SerializeField] protected float defaultSpeed = 1f;
+    [SerializeField] private float speed = 12f;
+    [SerializeField] protected float timeScale;
+    [SerializeField] protected float defaultTimeScale = 1f;
     [SerializeField] protected float bluePotionStack;
 
     private Vector2 _initialDistanceToTopOfPaddle;
@@ -124,8 +126,8 @@ public class Ball : SetupBehaviour
 
     private void Start()
     {        
-        defaultSpeed = GameSession.Instance.GameSpeed;
-        speed = defaultSpeed;
+        defaultTimeScale = GameSession.Instance.GameSpeed;
+        timeScale = defaultTimeScale;
     }
 
     protected virtual void ApplyPotion(PotionType obj)
@@ -148,7 +150,7 @@ public class Ball : SetupBehaviour
         var paddlePosition = objectPlay.Paddle.transform.position;
             
         FixBallOnTopOfPaddle(paddlePosition, _initialDistanceToTopOfPaddle);
-        ShootBallOnClick(initialBallSpeed, hasMouseClick);
+        ShootBallOnClick(direction, hasMouseClick);
     }
     
     /**
@@ -162,12 +164,12 @@ public class Ball : SetupBehaviour
     /**
      * Shoots the ball for the first time upon the first mouse click.
      */
-    public void ShootBallOnClick(Vector2 initialBallSpeed, bool hasMouseClick)
+    public void ShootBallOnClick(Vector2 direction, bool hasMouseClick)
     {
         if (!hasMouseClick) return;
         
         HasBallBeenShot = true;
-        _rigidBody2D.velocity = initialBallSpeed;
+        _rigidBody2D.velocity = direction * speed;
     }
 
     /**
@@ -189,41 +191,44 @@ public class Ball : SetupBehaviour
     public void OnCollisionEnter2D(Collision2D other)
     {
         if (!HasBallBeenShot) return;  // ball must have been shot first
-        
+        if(_rigidBody2D.velocity.magnitude != speed)
+        {
+            _rigidBody2D.velocity = _rigidBody2D.velocity.normalized * speed;
+        }
         var randomBumpAudioIndex = Random.Range(0, bumpAudioClips.Count);
-        var signVelocityY = Math.Sign(_rigidBody2D.velocity.y);
-        var signVelocityX = Math.Sign(_rigidBody2D.velocity.x);
-        
-        var correctVelocityY = _rigidBody2D.velocity.y;
-        var correctVelocityX = _rigidBody2D.velocity.x;
-        
         var bumpAudio = bumpAudioClips[randomBumpAudioIndex];
-            
         _audioSource.PlayOneShot(bumpAudio);
-        // _rigidBody2D.velocity += GetRandomVelocityBounce();
-
-        if (Math.Abs(_rigidBody2D.velocity.y) < 4f) correctVelocityY = 4f * signVelocityY;
-        if (Math.Abs(_rigidBody2D.velocity.x) < 4f) correctVelocityX = 4f * signVelocityX;
         
-        _rigidBody2D.velocity = new Vector2(correctVelocityX, correctVelocityY);
+        //var signVelocityY = Math.Sign(_rigidBody2D.velocity.y);
+        //var signVelocityX = Math.Sign(_rigidBody2D.velocity.x);
+        
+        //var correctVelocityY = _rigidBody2D.velocity.y;
+        //var correctVelocityX = _rigidBody2D.velocity.x;
+            
+        //// _rigidBody2D.velocity += GetRandomVelocityBounce();
+
+        //if (Math.Abs(_rigidBody2D.velocity.y) < 4f) correctVelocityY = 4f * signVelocityY;
+        //if (Math.Abs(_rigidBody2D.velocity.x) < 4f) correctVelocityX = 4f * signVelocityX;
+        
+        //_rigidBody2D.velocity = new Vector2(correctVelocityX, correctVelocityY);
     }
     protected virtual void ApplyOneBluePotion()
     {
         if (bluePotionStack >= 5) return;        
-        speed -= defaultSpeed * 0.1f;
-        GameSession.Instance.GameSpeed = speed;
+        timeScale -= defaultTimeScale * 0.1f;
+        GameSession.Instance.GameSpeed = timeScale;
         bluePotionStack++;
     }
     protected virtual void RemoveOneBluePotion()
     {
         if (bluePotionStack <= 0) return;
-        speed += defaultSpeed * 0.1f;
-        GameSession.Instance.GameSpeed = speed;
+        timeScale += defaultTimeScale * 0.1f;
+        GameSession.Instance.GameSpeed = timeScale;
         bluePotionStack--;
     }
     protected virtual void RemoveAllBluePotion()
     {
-        GameSession.Instance.GameSpeed = defaultSpeed;
+        GameSession.Instance.GameSpeed = defaultTimeScale;
     }
 
 }

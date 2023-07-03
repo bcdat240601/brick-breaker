@@ -1,10 +1,9 @@
-﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LoadSetupScene : SetupBehaviour
+public class LoadSceneUI : SetupBehaviour
 {
     protected override void Awake()
     {
@@ -13,13 +12,12 @@ public class LoadSetupScene : SetupBehaviour
     }
 
     protected virtual void LoadingSetupScene()
-    {        
-        Scene scene = SceneManager.GetSceneByName("SetupScene");
+    {
+        Scene scene = SceneManager.GetSceneByName(SubScene.UI.ToString());
         Debug.Log(scene.name);
         if (!scene.isLoaded)
         {
-            SceneManager.LoadSceneAsync("SetupScene", LoadSceneMode.Additive);
-            Debug.Log("loadsetup");
+            SceneManager.LoadSceneAsync(SubScene.UI.ToString(), LoadSceneMode.Additive);
         }
     }
 }

@@ -41,13 +41,16 @@ public class MenuSelector : VerticalMenuSelector
         var currentMenu = this.GetCurrentMenu();
 
         if (currentMenu.name == MENU_OPTION_START)
+        {
             sceneLoaderChannel.RaiseLoadSceneByName("Level1");
+            GameSession.Instance.SetGameLevel(1);
+        }
 
         else if (currentMenu.name == MENU_OPTION_INSTRUCTIONS)
             sceneLoaderChannel.RaiseLoadSceneByName("InstructionsMenu");
 
         else if (currentMenu.name == MENU_OPTION_OPTIONS)
-            sceneLoaderChannel.RaiseLoadSceneByName("OptionsMenu");
+            sceneLoaderChannel.RaiseLoadSceneByName("LevelMap");
 
         else
             sceneLoaderChannel.RaiseQuit();

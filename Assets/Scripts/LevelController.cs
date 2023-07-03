@@ -34,9 +34,14 @@ public class LevelController : SceneLoaderConnect
             ConfigManager.Instance.LevelDataSO.LevelDataList[gameSession.GameLevel - 1].Star = 3;
             if(ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed < gameSession.GameLevel)
                 ConfigManager.Instance.LevelDataSO.currentLevelHasPlayed = gameSession.GameLevel;
-            gameSession.GameLevel++;
-            sceneLoaderChannel.RaiseLoadNextScene();
+            int gameLevel = gameSession.GameLevel;
+            gameSession.SetGameLevel(++gameLevel);
+            StartCoroutine("StartNextScene");
         }
     }
-    
+    IEnumerator StartNextScene()
+    {
+        yield return new WaitForSeconds(0.5f);      
+        sceneLoaderChannel.RaiseLoadNextScene();
+    }
 }

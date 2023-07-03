@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8052374309985418522}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.432, y: 1.474, z: 0}
+  m_LocalPosition: {x: 0, y: 0.83, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -100,13 +100,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b3711d50663f48878457ff1bd6b1ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialBallSpeed: {x: 4, y: 12}
-  bounceRandomnessFactor: 1
+  objectPlay: {fileID: 0}
+  direction: {x: 0.31622776, y: 0.94868326}
+  bounceRandomnessFactor: 0.5
   bumpAudioClips:
   - {fileID: 8300000, guid: 2534f1b2a726847698e12bca09d36253, type: 3}
   - {fileID: 8300000, guid: 784e856801b4f4244987ce29199f8236, type: 3}
-  speed: 1
-  defaultSpeed: 1
+  speed: 12
+  timeScale: 0
+  defaultTimeScale: 1
   bluePotionStack: 0
 --- !u!50 &8052374309985418524
 Rigidbody2D:

@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class LoseCollider : SceneLoaderConnect
 {
-    private readonly string GAME_OVER_SCENE_NAME = "Scenes/GameOver";
+    private readonly string GAME_OVER_SCENE_NAME = "GameOver";
     
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -23,7 +23,8 @@ public class LoseCollider : SceneLoaderConnect
             }
 
             // deduces a game life from the player
-            gameSession.PlayerLives--;
+            int playerLive = gameSession.PlayerLives;
+            gameSession.SetPlayerLives(--playerLive);
             FixBallOnPaddleAfterLoss();
             
         }

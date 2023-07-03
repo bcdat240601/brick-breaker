@@ -89,7 +89,7 @@ public class Block : MonoBehaviour
     private void DestroyItself()
     {
         // adds player points
-        var gameState = FindObjectOfType<GameSession>();  // singleton
+        GameSession gameState = GameSession.Instance;  // singleton
         gameState.AddToPlayerScore(maxHits);
 
         // plays VFX and SFX for the destruction
